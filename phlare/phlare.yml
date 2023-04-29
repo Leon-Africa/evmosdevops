@@ -1,0 +1,17 @@
+scrape_configs:
+  - job_name: "phlare"
+    scrape_interval: "15s"
+    static_configs:
+      - targets: ["10.7.7.10:4100"]
+  - job_name: "grafana"
+    scrape_interval: "15s"
+    static_configs:
+      - targets: ["10.7.7.11:6060"]
+  - job_name: "golang"
+    scrape_interval: "15s"
+    static_configs:
+      - targets: ["golang:26556"]
+      - targets: ["golang:26657"]
+      - targets: ["golang:9090"]
+      - targets: ["golang:1317"]
+      - targets: ["golang:8545"]

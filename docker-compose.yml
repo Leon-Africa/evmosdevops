@@ -1,0 +1,315 @@
+version: "3.8"
+
+volumes:
+  prometheus_data: {}
+  grafana_data: {}
+  phlare_data: {}
+
+services:
+  evmos-devnet1:
+    image: evmos-devnet1
+    build:
+      context: ./evmos-devnet
+      args:
+        - commit_hash=tags/v9.1.0
+        # - commit_hash=tags/v11.0.0
+    profiles: [ "nodes" ]
+    restart: always
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.2
+    ports:
+      - 8545:8545
+      - 26660:26660
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    container_name: evmos-node-1
+
+  evmos-devnet2:
+    image: evmos-devnet2
+    build:
+      context: ./evmos-devnet
+      args:
+        - commit_hash=tags/v9.1.0
+        # - commit_hash=tags/v10.0.0-rc2
+        # - extra_flags=--metrics
+        # - commit_hash=tags/v11.0.0
+    profiles: [ "nodes" ]
+    restart: always
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.3
+    ports:
+      - 8546:8545
+      - 26661:26660
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    container_name: evmos-node-2
+
+  evmos-devnet3:
+    image: evmos-devnet3
+    build:
+      context: ./evmos-devnet
+      args:
+        - commit_hash=tags/v9.1.0
+        # - commit_hash=tags/v11.0.0
+    profiles: [ "nodes" ]
+    restart: always
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.4
+    ports:
+      - 8547:8545
+      - 26662:26660
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    container_name: evmos-node-3
+
+  evmos-devnet4:
+    image: evmos-devnet4
+    build:
+      context: ./evmos-devnet
+      args:
+        - commit_hash=tags/v9.1.0
+        # - commit_hash=tags/v11.0.0
+    profiles: [ "nodes" ]
+    restart: always
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.5
+    ports:
+      - 8548:8545
+      - 26663:26660
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:26657/status" ]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+    container_name: evmos-node-4
+
+  node-exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    profiles: [ "metrics" ]
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+      - '/:/host:ro,rslave'
+    command:
+      - '--path.rootfs=/host'
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - --collector.filesystem.ignored-mount-points
+      - "^/(sys|proc|dev|host|etc|rootfs/var/lib/docker/containers|rootfs/var/lib/docker/overlay2|rootfs/run/docker/netns|rootfs/var/lib/docker/aufs)($$|/)"
+    ports:
+      - 9100:9100
+    expose:
+      - 9100
+    pid: host
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.6
+    restart: always
+    container_name: node-exporter
+
+  prometheus:
+    image: prom/prometheus:v2.41.0
+    profiles: [ "metrics" ]
+    volumes:
+      - ./prometheus/:/etc/prometheus
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.console.libraries=/usr/share/prometheus/console_libraries'
+      - '--web.console.templates=/usr/share/prometheus/consoles'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - 9090:9090
+    expose:
+      - 9090
+    links:
+      - cadvisor:cadvisor
+      - alertmanager:alertmanager
+    depends_on:
+      - cadvisor
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.7
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    container_name: prometheus
+
+  alertmanager:
+    image: prom/alertmanager
+    profiles: [ "metrics" ]
+    ports:
+      - 9093:9093
+    volumes:
+      - ./alertmanager/:/etc/alertmanager/
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.8
+    restart: always
+    command:
+      - '--config.file=/etc/alertmanager/config.yml'
+      - '--storage.path=/alertmanager'
+    container_name: alertmanager
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor
+    profiles: [ "metrics" ]
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    ports:
+      - 8080:8080
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.9
+    restart: always
+    deploy:
+      mode: global
+    container_name: cadvisor
+
+  phlare:
+    image: grafana/phlare:latest
+    profiles: [ "metrics" ]
+    restart: always
+    ports:
+      - "4100:4100"
+    command: -config.file=/etc/phlare/config.yaml
+    volumes:
+      - ./phlare/phlare.yml:/etc/phlare/config.yaml
+      - phlare_data:/data
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.10
+    container_name: phlare
+
+  grafana:
+    image: grafana/grafana
+    profiles: [ "metrics" ]
+    restart: always
+    ports:
+      - 3000:3000
+    expose:
+      - 3000
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=flameGraph
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_DIAGNOSTICS_PROFILING_ENABLED=true
+      - GF_DIAGNOSTICS_PROFILING_ADDR=0.0.0.0
+      - GF_DIAGNOSTICS_PROFILING_PORT=6060
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.11
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources
+      - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards
+    depends_on:
+      - prometheus
+    container_name: grafana
+
+  tx-bot1:
+    build:
+      context: .
+      dockerfile: bots/Dockerfile.automation
+    profiles: [ "bots" ]
+    ports:
+      - 8081:8080
+    expose:
+      - 8080
+      - 8545
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.12
+    depends_on:
+      - evmos-devnet1
+    environment:
+      - ORCH_PRIV_KEY=0x1c384b3fb9a1cff8caee1e2d078bb9bc28a542dcc7ac779a445dc68b3dc2fe1f
+      - RPC_URL=http://10.7.7.2:8545
+    restart: always
+    container_name: tx-bot-1
+
+  tx-bot2:
+    build:
+      context: .
+      dockerfile: bots/Dockerfile.automation
+    profiles: [ "bots" ]
+    ports:
+      - 8082:8080
+    expose:
+      - 8080
+      - 8545
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.13
+    depends_on:
+      - evmos-devnet2
+    environment:
+      - ORCH_PRIV_KEY=0x1c384b3fb9a1cff8caee1e2d078bb9bc28a542dcc7ac779a445dc68b3dc2fe1f
+      - RPC_URL=http://10.7.7.3:8545
+    restart: always
+    container_name: tx-bot-2
+
+  tx-bot3:
+    build:
+      context: .
+      dockerfile: bots/Dockerfile.automation
+    profiles: [ "bots" ]
+    ports:
+      - 8083:8080
+    expose:
+      - 8080
+      - 8545
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.14
+    depends_on:
+      - evmos-devnet3
+    environment:
+      - ORCH_PRIV_KEY=0x1c384b3fb9a1cff8caee1e2d078bb9bc28a542dcc7ac779a445dc68b3dc2fe1f
+      - RPC_URL=http://10.7.7.4:8545
+    restart: always
+    container_name: tx-bot-3
+
+  tx-bot4:
+    build:
+      context: .
+      dockerfile: bots/Dockerfile.automation
+    profiles: [ "bots" ]
+    ports:
+      - 8084:8080
+    expose:
+      - 8080
+      - 8545
+    networks:
+      devnet:
+        ipv4_address: 10.7.7.15
+    depends_on:
+      - evmos-devnet4
+    environment:
+      - ORCH_PRIV_KEY=0x1c384b3fb9a1cff8caee1e2d078bb9bc28a542dcc7ac779a445dc68b3dc2fe1f
+      - RPC_URL=http://10.7.7.5:8545
+    restart: always
+    container_name: tx-bot-4
+
+networks:
+  devnet:
+    ipam:
+      driver: default
+      config:
+        - subnet: "10.7.7.7/25" #usable 125
