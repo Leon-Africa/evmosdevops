@@ -226,7 +226,7 @@ services:
   tx-bot1:
     build:
       context: .
-      dockerfile: bots/Dockerfile.automation
+      dockerfile: evmostxbots/Dockerfile.automation
     profiles: [ "bots" ]
     ports:
       - 8081:8080
@@ -247,7 +247,7 @@ services:
   tx-bot2:
     build:
       context: .
-      dockerfile: bots/Dockerfile.automation
+      dockerfile: evmostxbots/Dockerfile.automation
     profiles: [ "bots" ]
     ports:
       - 8082:8080
@@ -268,7 +268,7 @@ services:
   tx-bot3:
     build:
       context: .
-      dockerfile: bots/Dockerfile.automation
+      dockerfile: evmostxbots/Dockerfile.automation
     profiles: [ "bots" ]
     ports:
       - 8083:8080
@@ -289,7 +289,7 @@ services:
   tx-bot4:
     build:
       context: .
-      dockerfile: bots/Dockerfile.automation
+      dockerfile: evmostxbots/Dockerfile.automation
     profiles: [ "bots" ]
     ports:
       - 8084:8080
