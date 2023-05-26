@@ -62,7 +62,7 @@ Transaction bots are refernced via submodule to the following repository[here](h
 
 Bots submit tx on the network using the account specified in the `start.sh` - by default private key is the same for all instances of the tx bot and the bot uses our JSON-RPC API which is exposed on port `8545`.
 
-see [docker-compose.yml](https://github.com/facs95/devops/blob/main/docker-compose.yml).
+see [docker-compose.yml](https://github.com/Leon-Africa/evmosdevops/blob/main/docker-compose.yml).
 
 There is one tx bot per node.
 
