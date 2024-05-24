@@ -15,12 +15,7 @@ You can update the commits to be tested by updating `commit_hash` for the respec
 
 The mission is for you to expand the functionalities of this repo to accomplish the following tasks:
 
-1. Set up a Grafana dashboard instance through the same docker-compose setup, in which instance specific metrics of each of the nodes are displayed and can be compared (CPU, Memory etc..)
-2. Expose some of the prometheus metrics that each node provides at `http://localhost:26660/metrics` through the Grafana dashboard. (e.g `feemarket_base_fee` is one that we are usually interested on)
-3. (Optional) In order to get more interesting data, Add a tx-bot to the docker-compose setup so that it generates traffic on the node’s network. You can find the tx-bot repo [here](https://github.com/evmos/bots)
-
 ## Run
-
 
 To run the localnet setup, start the docker containers (defined in [docker-compose.yml](https://github.com/facs95/devops/blob/main/docker-compose.yml)) using
 
