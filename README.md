@@ -7,7 +7,7 @@ Use this repo to start a Evmos Devnet compose of 4 nodes:
 - `evmos-devnet3`
 - `evmos-devnet4`
 
-Note: `[default v11.0.0]`
+Note: `[default v9.1.0]`
 
 ## Customize
 
@@ -52,7 +52,7 @@ docker compose --profile nodes --profile metrics --profile bots down
 
 ## Tx-bot
 
-Transaction bots are refernced via submodule to the following repository[here](https://github.com/evmos/bots)
+Transaction bots are refernced via submodule to the following repository  [here](https://github.com/evmos/bots)
 
 
 Bots submit tx on the network using the account specified in the `start.sh` - by default private key is the same for all instances of the tx bot and the bot uses our JSON-RPC API which is exposed on port `8545`.
@@ -77,6 +77,8 @@ Nodes:
 | evmos-node-4  | 10.7.7.5  | 8548:8545 / 26663:26660  |
 
 Metrics:
+
+In browser use ````localhost```` as IP
 
 | Name          | IP            | Ports         |
 | ------------- | ------------- | ------------- |
