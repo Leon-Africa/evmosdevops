@@ -9,6 +9,9 @@ Use this repo to start a Evmos Devnet compose of 4 nodes:
 
 Note: `[default v9.1.0]`
 
+## NOTE: This repository has moved: https://github.com/evmos/testing
+
+
 ## Customize
 
 You can update the commits to be tested by updating `commit_hash` for the respective evmos-devnet nodes in `docker-compose.yml`. 
