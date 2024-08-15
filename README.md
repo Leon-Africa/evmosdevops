@@ -16,8 +16,6 @@ Note: `[default v9.1.0]`
 
 You can update the commits to be tested by updating `commit_hash` for the respective evmos-devnet nodes in `docker-compose.yml`. 
 
-The mission is for you to expand the functionalities of this repo to accomplish the following tasks:
-
 ## Run
 
 To run the localnet setup, start the docker containers (defined in [docker-compose.yml](https://github.com/facs95/devops/blob/main/docker-compose.yml)) using
